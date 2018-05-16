@@ -72,11 +72,11 @@
   </thead>
   <tbody>
 
-    <tr v-for="event of events">
-      <th scope="row">{{ event.id }}</th>
-      <th>{{ event.longitude }}</th>
-      <th>{{ event.latitude }}</th>
-      <th>{{ event.adress }} {{ event.zip }} {{ event.city }}</th>
+    <tr v-for="location of locations">
+      <th scope="row">{{ location.id }}</th>
+      <th>{{ location.longitude }}</th>
+      <th>{{ location.latitude }}</th>
+      <th>{{ location.adress }} {{ location.zip }} {{ location.city }}</th>
     </tr>
   </tbody>
 </table>
@@ -93,16 +93,14 @@ export default {
   name: 'geolocations',
 
   mounted() {
-    this.createMap();
-  },
-  created() {
     this.getLocations();
+    //this.createMap();
   },
   data () {
     return {
       longitude: null,
       latitude: null,
-      events: [],
+      locations: [],
       errors: [],
       form: {
         adress: null,
@@ -117,8 +115,10 @@ export default {
       let url = 'http://localhost:8080/api/geolocations/';
       axios.get(url)
         .then((response) => {
-          this.events = response.data;
-          console.log(this.events);
+          this.locations = response.data;
+          console.log("got events")
+          console.log(this.locations);
+          this.createMap();
         })
         .catch((e) => {
           this.errors.push(e);
@@ -149,16 +149,18 @@ export default {
           this.errors.push(e);
         });
     },
+
+
     createMap: function () {
       mapboxgl.accessToken = 'pk.eyJ1IjoiZGFuaWVsbXVlbGxlciIsImEiOiJjamV6aWI0cm8wZGlqMzNubmY0Y2Z3dTV3In0.XvpytTUjg0lX_Kh1SLOvqg'
-      this.map = new mapboxgl.Map({
+      map = new mapboxgl.Map({
           container: 'map',
           style: 'mapbox://styles/mapbox/streets-v9',
-          center: [8.25, 49.99], // Manhattan
-          zoom: 13
+          center: [8.241, 49.993], // Campus
+          zoom: 14
       })
       var nav = new mapboxgl.NavigationControl();
-      this.map.addControl(nav, 'top-left');
+      map.addControl(nav, 'top-left');
 
       var geolocate = new mapboxgl.GeolocateControl({
           positionOptions: {
@@ -166,40 +168,55 @@ export default {
           },
           trackUserLocation: true
       });
-      this.map.addControl(geolocate);
+      map.addControl(geolocate);
+
       geolocate.on('geolocate', (e) => {
-        console.log(e);
+        //console.log(e);
         this.longitude = e.coords.longitude;
         this.latitude = e.coords.latitude;
       })
+
+      this.locations.forEach(function(marker) {
+          var el = document.createElement('div');
+          el.id = "marker";
+
+          var popup = new mapboxgl.Popup({ offset: 25 })
+          .setText('Ein Ort auf dem Campus');
+          new mapboxgl.Marker(el)
+            .setLngLat([marker.longitude, marker.latitude])
+            .setPopup(popup) // sets a popup on this marker
+            .addTo(map);
+      });
     }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
+<style>
 
 #map {
   width: 100%;
   height: 500px;
   position: relative;
+}
+
+.mapboxgl-popup {
+  max-width: 200px;
+}
+
+.mapboxgl-popup-content {
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+}
+
+#marker {
+    background-color: #333333;
+    background-image: url('https://www.iconsdb.com/icons/download/tropical-blue/map-marker-2-64.png');
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
 }
 </style>

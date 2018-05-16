@@ -1,39 +1,66 @@
 <template>
   <div>
-  <div class="grid-container">
-    <div class="grid-x grid-padding-x small-up-2 medium-up-3">
-      <div v-for="event of events" class="cell"">
-        <div class="card">
-          <div class="card-divider">
-            <h4>{{event.name}}</h4>
-          </div>
-          <img src="" alt="image">
-          <div class="card-section">
-            <p>{{ event.startDate }} bis {{ event.endDate }}</p>
-          </div>
-        </div>
+    <b-card-group deck>
+      <div class="col-sm-3 p-1" v-for="event of events">
+        <b-card   :key="event.id"
+                  :title="event.name"
+                  img-src="https://lorempixel.com/600/300/food/5/"
+                  img-alt="Image"
+                  img-top
+                  tag="article"
+                  class="m-2">
+          <p>{{ event.startDate }} bis {{ event.endDate }}</p>   
+          <!--<router-link :to="{name: 'agenda', params: {scheduleId: schedule.id}}" exact>-->
+            <b-button variant="primary">edit</b-button>
+          </router-link>
+        </b-card>
       </div>
-      <div class="cell">
-        <a data-open="eventForm">
-          <i class="icon-plus large-icon"></i>
-        </a>
-        <div class="reveal" id="eventForm" data-reveal>
-          <h1>New Event</h1>
-        <form @submit.prevent="postPost()" method="post">
-          <label>Name
-            <input type="text" v-model="name" />
-          </label>
-          <label>Info
-            <textarea rows="4" v-model="info"></textarea>
-          </label>
-          <label>Datum
-            <el-date-picker
+      <div class="col-sm-3">
+          <b-btn v-b-modal.newEvent>add event</b-btn>
+        </div>
+    </b-card-group>
+
+    <b-modal  id="newEvent"
+              ref="newEvent"  
+              hide-footer 
+              title="New Event">
+      <form @submit.stop.prevent="postPost()">
+        <b-form-group id="name"
+                      label="Name"
+                      label-for="NameInput">
+          <b-form-input id="NameInput"
+                        type="text"
+                        v-model="name"
+                        placeholder="Title of the Event-Series">
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group id="info"
+                      label="Info"
+                      label-for="InfoInput">
+          <b-form-textarea id="InfoInput"
+                        type="text"
+                        v-model="info"
+                        placeholder="Describe your schedule"
+                        :rows="3">
+          </b-form-textarea>
+        </b-form-group>
+
+        <b-form-group id="date"
+                      label="Date"
+                      label-for="DateInput">
+          <el-date-picker
+              id="DateInput"
               v-model="date"
               type="date">
             </el-date-picker>
-          </label>
-          <label>Zeit
-            <el-time-picker
+        </b-form-group>
+
+        <b-form-group id="time"
+                      label="Start and end time"
+                      label-for="TimeInput">
+          <el-time-picker
+              id="TimeInput"
               is-range
               v-model="time"
               range-separator="-"
@@ -42,34 +69,26 @@
                 start: '09:00', 
                 end: '10:00'
               }">
-            </el-time-picker>
-          </label>
-          </label>
-          <label>Ort
-            <select v-if="venues && venues.length" v-model="venueId">
-              <option v-for="venue of venues" v-bind:value="venue.id">
+          </el-time-picker>
+        </b-form-group>
+
+        <b-form-group id="venue"
+                      label="Venue"
+                      label-for="VenueInput">
+          <b-form-select v-model="venueId" id="VenueInput">
+            <option v-for="venue of venues" v-bind:value="venue.id">
               {{venue.name}}
               </option>
-            </select>
-          </label>
-          <button class="success button" type="submit" name="button">Submit</button>
-         </form>
-          <button class="close-button" data-close aria-label="Close modal" type="button">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="grid-x">
-      <div class="medium-6 large-4 cell">
-        <ul v-if="errors && errors.length">
-          <li v-for="error of errors">
-            {{error.message}}
-          </li>
-        </ul>
-      </div>
-    </div>
+          </b-form-select>
+        </b-form-group>
+        <b-button type="submit" variant="primary">Submit</b-button>
+      </form>
+    </b-modal>
+    <ul v-if="errors && errors.length">
+      <li v-for="error of errors">
+        {{error.message}}
+      </li>
+    </ul>
   </div>
 </template>
 <script>
@@ -135,6 +154,7 @@ export default {
           this.startDate = '';
           this.venueId = '';
           this.getPosts();
+          this.hideModal();
         })
         .catch((e) => {
           this.errors.push(e);
@@ -152,6 +172,9 @@ export default {
         .catch((e) => {
           this.eventerrors.push(e);
         });
+    },
+    hideModal () {
+      this.$refs.newEvent.hide()
     },
   },
 };

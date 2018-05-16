@@ -1,59 +1,72 @@
 <template>
   <div>
-  <div class="grid-container">
-    <div class="grid-x grid-padding-x small-up-2 medium-up-3" data-equalizer="card" id="equalizer">
-      <div v-for="schedule of schedules" class="cell">
-        <div class="card" data-equalizer-watch="card">
-          <div class="card-divider">
-            <h4>{{schedule.name}}</h4>
-          </div>
-          <!--<img src="../assets/img/orbit/01.jpg" alt="image">-->
-          <div class="card-section">
-            <p>{{ schedule.info }}</p>
-            <router-link :to="{name: 'agenda', params: {scheduleId: schedule.id}}" exact>
-              <button type="button" class="success button">edit</button>
-            </router-link>
-          </div>
-        </div>
-      </div>
+    <b-card-group deck>
+      <div class="col-sm-3 p-1" v-for="schedule of schedules">
+        <b-card   :key="schedule.id"
+                  :title="schedule.name"
+                  img-src="https://lorempixel.com/600/300/food/5/"
+                  img-alt="Image"
+                  img-top
+                  tag="article"
+                  class="m-2">
 
-      <div class="cell centered-icon">
-        <a data-open="scheduleForm">
-          <i class="icon-plus "></i>
-        </a>
-        <div class="reveal" id="scheduleForm" data-reveal>
-          <h1>New Schedule</h1>
-          <form @submit.prevent="postPost()" method="post">
-          <label>Veranstaltung
-            <input type="text" v-model="name" />
-          </label>
-          <label>Info
-            <textarea rows="4" v-model="info"></textarea>
-          </label>
+          <p class="card-text">{{ schedule.info }}</p>
+          <router-link :to="{name: 'agenda', params: {scheduleId: schedule.id}}" exact>
+            <b-button variant="primary">edit</b-button>
+          </router-link>
+        </b-card>
+        </div>
+
+        <div class="col-sm-3">
+          <b-btn v-b-modal.newSchedule>add schedule</b-btn>
+        </div>
+      </b-card-group>
+    
+
+    <b-modal  id="newSchedule"
+              ref="newSchedule"  
+              hide-footer 
+              title="New Schedule">
+      <form @submit.stop.prevent="postPost()">
+        <b-form-group id="name"
+                      label="Name"
+                      label-for="NameInput">
+          <b-form-input id="NameInput"
+                        type="text"
+                        v-model="name"
+                        placeholder="Title of the Event-Series">
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group id="info"
+                      label="Info"
+                      label-for="InfoInput">
+          <b-form-textarea id="InfoInput"
+                        type="text"
+                        v-model="info"
+                        placeholder="Describe your schedule"
+                        :rows="3">
+          </b-form-textarea>
+        </b-form-group>
+
+        <b-form-group id="dates"
+                      label="Start and End"
+                      label-for="DatesInput">
           <el-date-picker
+            id="DatesInput"
             v-model="dates"
             type="daterange"
             range-separator="-">
           </el-date-picker>
-          <button class="success button" type="submit" name="button">Submit</button>
-        </form>
-          <button class="close-button" data-close aria-label="Close modal" type="button">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid-x">
-      <div class="medium-6 large-4 cell">
-        <ul v-if="errors && errors.length">
-          <li v-for="error of errors">
-            {{error.message}}
-          </li>
-        </ul>
-      </div>
-    </div>
+        </b-form-group>
+        <b-button type="submit" variant="primary">Submit</b-button>
+      </form>
+    </b-modal>
+    <ul v-if="errors && errors.length">
+      <li v-for="error of errors">
+        {{error.message}}
+      </li>
+    </ul>      
   </div>
 </template>
 <script>
@@ -92,6 +105,7 @@ export default {
           this.name = '';
           this.info = '';
           this.getPosts();
+          this.hideModal();
         })
         .catch((e) => {
           this.errors.push(e);
@@ -107,6 +121,9 @@ export default {
           this.errors.push(e);
         });
     },
+    hideModal () {
+      this.$refs.newSchedule.hide()
+  },
   },
 };
 </script>

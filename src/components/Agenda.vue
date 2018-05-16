@@ -1,10 +1,8 @@
 <template>
-	<div class="x-grid">
-		<div class="cell">
-			<h3>{{ schedule.name }}</h3>
-			<p>{{ schedule.info }}</p>
-		</div>
-	</div>
+  <div>
+  	<h3>{{ schedule.name }}</h3>
+  	<p>{{ schedule.info }}</p>
+  </div>
 </template>
 
 <script>

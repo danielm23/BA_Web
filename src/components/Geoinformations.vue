@@ -1,52 +1,93 @@
 <template>
-<div class="container">
-  <div class="row">
   <div>
-    <b-form @submit="postGeoinformations">
-      <b-form-group id="title"
-                    label="Geoinformation"
-                    label-for="TitleInput">
-        <b-form-input id="TitleInput"
-                      type="text"
-                      v-model="form.title"
-                      placeholder="title">
-        </b-form-input>
-      </b-form-group>
+<b-container>
+    <b-row>
+        <b-col>
+          <b-form @submit="postGeoinformations">
+              <b-form-group id="title"
+                            label="Geoinformation"
+                            label-for="TitleInput">
+                <b-form-input id="TitleInput"
+                              type="text"
+                              v-model="form.title"
+                              placeholder="title">
+                </b-form-input>
+              </b-form-group>
 
-      <b-form-group>
-        <b-form-textarea id="info"
-                   v-model="form.text"
-                   placeholder="information"
-                   :rows="2">
-        </b-form-textarea>
-      </b-form-group>
+              <b-form-group>
+                <b-form-textarea id="info"
+                           v-model="form.text"
+                           placeholder="information"
+                           :rows="2">
+                </b-form-textarea>
+              </b-form-group>
 
-      <b-form-group>
-        <b-form-textarea id="detail"
-                   v-model="form.detail"
-                   placeholder="detail"
-                   :rows="4">
-        </b-form-textarea>
-      </b-form-group>
+              <b-form-group>
+                <b-form-textarea id="detail"
+                           v-model="form.detail"
+                           placeholder="detail"
+                           :rows="4">
+                </b-form-textarea>
+              </b-form-group>
 
-      <b-form-group>
-        <b-form-textarea id="synonyms"
-                   v-model="form.synonyms"
-                   placeholder="synonyms"
-                   :rows="3">
-        </b-form-textarea>
-      </b-form-group>
+              <b-form-group>
+                <b-form-textarea id="synonyms"
+                           v-model="form.synonyms"
+                           placeholder="synonyms"
+                           :rows="3">
+                </b-form-textarea>
+              </b-form-group>
 
-      <b-form-group id="exampleGroup4">
-        <b-form-checkbox-group v-model="form.checked" id="exampleChecks">
-          <b-button type="submit" variant="primary">Submit</b-button>
+              <b-form-group id="exampleGroup4">
+                <b-form-checkbox-group>
+                  <b-button type="submit" variant="primary">Submit</b-button>
 
-        </b-form-checkbox-group>
-      </b-form-group>
-      
-    </b-form>
+                </b-form-checkbox-group>
+              </b-form-group>
+            </b-form>
+        </b-col>
+          <b-col>
+            <b-form @submit="postGroupinformations">
+              <b-form-group id="group"
+                            label="Groups"
+                            label-for="GroupInput">
+              <b-form-select 
+                id="GroupInput"
+                v-model="selectedgeoinformation" 
+                class="mb-3">
+                  <option :value = event.id
+                          v-for = "event of events">
+                        {{ event.title }}
+                  </option>
+              </b-form-select>
+            </b-form-group>
 
-  </div>
+              <b-form-group label="Groups">
+                <b-form-checkbox-group 
+                  stacked
+                  id = "groupCheckboxes" 
+                  name = "geogroups" 
+                  v-model = "selectedgroups">
+                    <b-form-checkbox 
+                      v-for = "group of groups"
+                      :value = group.id>
+                        {{ group.title }}
+                    </b-form-checkbox>
+                </b-form-checkbox-group>
+              </b-form-group>
+              <b-form-group id="exampleGroup4">
+                <b-form-checkbox-group>
+                  <b-button type="submit" variant="primary">Submit</b-button>
+
+                </b-form-checkbox-group>
+              </b-form-group>
+              </b-form>
+          </b-col>
+          </b-row>
+</b-container>
+
+  
+
 
 
     <ul v-if="errors && errors.length">
@@ -76,7 +117,7 @@
     </tr>
   </tbody>
 </table>
-  </div>
+
 </div>
 
 </template>
@@ -92,10 +133,15 @@ export default {
   },
   created() {
     this.getGeoinformations();
+    this.getGeogroups()
   },
   data () {
     return {
       events: [],
+      groups: [],
+      selectedgroups: [],
+      geogroupsREC: [],
+      selectedgeoinformation: null,
       errors: [],
       form: {
         title: null,
@@ -105,6 +151,14 @@ export default {
       },
     }
   },
+  watch: { 
+    'selectedgeoinformation': function() { 
+      this.getGroupsForGeoinformation()
+      console.log("watch");
+    //put your addThing code here, as you now have the thing variable set. 
+  } },
+
+
   methods: {
     getGeoinformations() {
       let url = 'http://localhost:8080/api/geoinformations/';
@@ -112,6 +166,17 @@ export default {
         .then((response) => {
           this.events = response.data;
           console.log(this.events);
+        })
+        .catch((e) => {
+          this.errors.push(e);
+        });
+    },
+    getGeogroups() {
+      let url = 'http://localhost:8080/api/geogroups/';
+      axios.get(url)
+        .then((response) => {
+          this.groups = response.data;
+          console.log(this.groups);
         })
         .catch((e) => {
           this.errors.push(e);
@@ -138,6 +203,60 @@ export default {
         .catch((e) => {
           this.errors.push(e);
         });
+    },
+    postGroupinformations() {
+      axios.post('http://localhost:8080/api/geoinformations', {
+        title: this.form.title,
+        shortinformation: this.form.info, 
+        detailinformation: this.form.detail, 
+        synonyms: this.form.synonyms, 
+        created: new Date().toISOString().split('.')[0]+"Z", 
+      })
+        .then((response) => {
+          console.log('axios log: ', response);
+          /*this.name = '';
+          this.info = '';
+          this.startDate = '';
+          this.endDate = '';
+          this.startDate = '';
+          this.venueId = '';
+          this.getPosts();*/
+        })
+        .catch((e) => {
+          this.errors.push(e);
+        });
+    },
+
+    copyGroupInfos() {
+      var selected = this.selectedgroups;
+      this.geogroupsREC.forEach(function (group) {
+        console.log("added");
+        console.log(group.id);
+        //console.log(this.selectedgroups);
+        selected.push(group.id)
+      });
+      console.log(selected);
+      this.selectedgroups = selected;
+    },
+
+    getGroupsForGeoinformation() {
+      this.selectedgroups = [];
+      this.geogroupsREC = [];
+
+      let url = 'http://localhost:8080/api/geoinformations/';
+      url += this.selectedgeoinformation;
+      url += '/groups';
+      axios.get(url)
+        .then((response) => {
+          console.log('axios log: ', response);
+          this.geogroupsREC = response.data;
+          this.copyGroupInfos();
+
+        })
+        .catch((e) => {
+          this.errors.push(e);
+        });
+
     }
   }
 }

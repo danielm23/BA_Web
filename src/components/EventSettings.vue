@@ -1,100 +1,114 @@
 <template>
-  <div class="grid-container">
-    <div class="x-grid">
-      <h4>Event Settings</h4>
-      <ul id="tabs" class="tabs" data-tabs>
-        <li class="tabs-title is-active"><a href="#panel1d" aria-selected="true">Venues</a></li>
-        <li class="tabs-title"><a href="#panel2d">Categories</a></li>
-        <li class="tabs-title"><a href="#panel3d">General Settings</a></li>
-      </ul>
-      <div class="tabs-content" data-tabs-content="tabs">
-        <div class="tabs-panel is-active" id="panel1d">
-          <div class="grid-x">
-            <div class="small-12 medium-8 large-4 cell">
-              <div v-for="venue of venues">
-                <div data-closable class="callout alert-callout-subtle">
-                  {{venue.name}}
-                  <button class="close-button" aria-label="Dismiss alert" type="button" data-close>
-                    <span aria-hidden="true">⊗</span>
-                  </button>
-                </div>
-              </div>
-              <a data-open="venueForm">
-                <i class="icon-plus large-icon"></i>
-            </a>
-            </div>
-          </div>
-          <div class="reveal" id="venueForm" data-reveal>
-            <form @submit.prevent="postVenues()" method="post">
-              <div class="grid-x">
-                <div class="medium-12 cell">
-                  <h1>New Venue</h1>
-                  <label>Name
-                    <input type="text" v-model="venueName" />
-                  </label>
-                  <button class="success button" type="submit" name="button">Submit</button>
-                </div>
-                <button class="close-button" data-close aria-label="Close modal" type="button">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <div class="tabs-panel" id="panel2d">
-          <div class="grid-x">
-            <div class="small-12 medium-8 large-4 cell">
-              <div v-for="category of categories">
-                <div v-bind:style="{'border-color': '#' + category.color}" data-closable class="callout alert-callout-subtle">
-                  {{category.name}} (#{{category.color}})
-                  <button class="close-button" aria-label="Dismiss alert" type="button" data-close>
-                    <span aria-hidden="true">⊗</span>
-                  </button>
-                </div>
-              </div>
-              <a data-open="categoryForm">
-                <i class="icon-plus large-icon"></i>
-            </a>
-            </div>
-          </div>
-          <div class="reveal" id="categoryForm" data-reveal>
-            <form @submit.prevent="postCategories()" method="post">
-              <div class="grid-x">
-                <div class="medium-12 cell">
-                  <h1>New Category</h1>
-                  <label>Name
-                    <input type="text" v-model="categoryName" />
-                  </label>
-                </div>
-              </div>
-              <div class="grid-x">
-                <div class="large-6 cell">
-                  <label>Color (HEX)
-                    <input type="text" v-model="categoryColor" />
-                  </label>
-                </div>
-              </div>
-              <div class="grid-x">
-                <div class="medium-12 cell">
-                  <button class="success button" type="submit" name="button">Submit</button>
-                </div>
-                <button class="close-button" data-close aria-label="Close modal" type="button">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <div class="tabs-panel" id="panel3d">
+  <div>
+	<h4>Event Settings</h4>
+	<b-tabs>
+	  <b-tab title="Venues" active>
+	    	<!-- TAB 1 -->
+			<div class="col-sm-3 p-1">
+				<b-list-group>
+					<b-list-group-item v-for="venue of venues" :key="venue.id">
+				  		{{venue.name}}
+					</b-list-group-item>
+					<b-list-group-item active v-b-modal.newVenue>
+						Add venue
+					</b-list-group-item>
+				</b-list-group>
 
-          <div id="qr_code">
-            <p>With this code the schedule can be shared.
-            </p>
-            <img :src="qrLink"/>
-          </div>
-        </div>
-      </div>
-    </div>
+				<b-modal  id="newVenue"
+				              ref="newVenue"  
+				              hide-footer 
+				              title="New Venue">
+
+					<form @submit.stop.prevent="postVenues()">
+						<b-form-group id="name"
+						              label="Name"
+						              label-for="NameInput">
+							<b-form-input id="NameInput"
+							            type="text"
+							            v-model="venueName"
+							            placeholder="Title of the Event-Venue">
+							</b-form-input>
+						</b-form-group>
+
+						<b-form-group id="geoinformation"
+	                      label="Place"
+	                      label-for="GeoInput">
+				          <b-form-select 	v-model="geoinformationId" 
+				          					id="GeoInput">
+				            <option v-for="geoinformation of geoinformations" 
+				            		v-bind:value="geoinformation.id">
+				              {{geoinformation.title}}
+				              </option>
+				          </b-form-select>
+				        </b-form-group>
+						<b-button type="submit" variant="primary">Submit</b-button>
+					</form>
+				</b-modal>
+			</div>
+	  </b-tab>
+
+	  <b-tab title="Categories" >
+	   	<!-- TAB 1 -->
+			<div class="col-sm-3 p-1">
+				<b-list-group>
+					<b-list-group-item 
+						v-for="category of categories" 
+						:key="category.id">
+				  			{{category.name}}
+				  		<b-badge 	variant="primary" 
+				  					pill
+				  					v-bind:style="{'background-color': '#' + category.color}">
+				  			#{{category.color}}
+				  		</b-badge>
+					</b-list-group-item>
+
+					<b-list-group-item active v-b-modal.newCategory>
+						Add category
+					</b-list-group-item>
+				</b-list-group>
+
+				<b-modal  id="newCategory"
+				              ref="newCategory"  
+				              hide-footer 
+				              title="New Category">
+
+					<form @submit.stop.prevent="postCategories()">
+						<b-form-group id="categoryName"
+						              label="Name"
+						              label-for="NameInput">
+							<b-form-input id="NameInput"
+							            type="text"
+							            v-model="categoryName"
+							            placeholder="Title of the Event-Category">
+							</b-form-input>
+						</b-form-group>
+
+						<b-form-group 	id="categoryColor"
+	                      				label="Color"
+	                      				label-for="ColorInput">
+				          <!--<b-form-input 	v-model="categoryColor" 
+				          					id="ColorInput"
+				          					placeholder="Color(Hex)">
+				          </b-form-input>-->
+				          <el-color-picker 	v-model="categoryColor"
+				          					id="ColorInput">					
+				          </el-color-picker>
+				        </b-form-group>
+						
+						<b-button type="submit" variant="primary">Submit</b-button>
+					</form>
+				</b-modal>
+			</div>
+	  </b-tab>
+
+	  <b-tab title="General Settings">
+	    <div id="qr_code">
+	            <p>With this code the schedule can be shared.
+	            </p>
+	            <img :src="qrLink"/>
+	          </div>
+	  </b-tab>
+	</b-tabs>
   </div>
 </template>
 
@@ -102,16 +116,15 @@
 import axios from 'axios';
 
 export default {
-
-  name: 'tabs',
   mounted() {
-    
     this.generateQrCode();
   },
   data() {
     return {
       venues: [],
       categories: [],
+      geoinformations: [],
+      geoinformationId: '',
       errors: [],
       venueName: '',
       categoryName: '',
@@ -129,6 +142,7 @@ export default {
   created() {
     this.getVenues();
     this.getCategories();
+    this.getGeoinformations()
   },
   methods: {
     getVenues() {
@@ -161,15 +175,27 @@ export default {
           this.eventerrors.push(e);
         });
     },
+    getGeoinformations() {
+      let url = 'http://localhost:8080/api/geoinformations/';
+      axios.get(url)
+        .then((response) => {
+          this.geoinformations = response.data;
+        })
+        .catch((e) => {
+          this.eventerrors.push(e);
+        });
+    },
     postVenues() {
       axios.post('http://localhost:8080/api/venues', {
         name: this.venueName,
         scheduleId: this.$route.params.scheduleId,
+        geoinformationId: this.geoinformationId,
       })
         .then((response) => {
           console.log('axios log: ', response);
           this.venueName = '';
           this.getVenues();
+          this.hideVenueModal();
         })
         .catch((e) => {
           this.errors.push(e);
@@ -178,7 +204,7 @@ export default {
     postCategories() {
       axios.post('http://localhost:8080/api/tags', {
         name: this.categoryName,
-        color: parseInt(this.categoryColor, 16),
+        color: parseInt(this.categoryColor.substr(1), 16),
         scheduleId: this.$route.params.scheduleId,
       })
         .then((response) => {
@@ -186,6 +212,7 @@ export default {
           this.categoryName = '';
           this.categoryColor = '';
           this.getCategories();
+          this.hideCategoryModal();
         })
         .catch((e) => {
           this.errors.push(e);
@@ -198,6 +225,12 @@ export default {
       qrurl += schedule;
       qrurl += '&choe=UTF-8';
       this.qrLink = qrurl;
+    },
+    hideVenueModal () {
+      this.$refs.newVenue.hide()
+    },
+    hideCategoryModal () {
+      this.$refs.newCategory.hide()
     },
   },
 };
