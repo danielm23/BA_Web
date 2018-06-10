@@ -162,7 +162,7 @@ export default {
       const schedule = this.$route.params.scheduleId;
       let url = 'http://localhost:8080/api/schedules/';
       url += schedule;
-      url += '/tags';
+      url += '/categories';
       axios.get(url)
         .then((response) => {
           this.categories = response.data;
@@ -202,7 +202,7 @@ export default {
         });
     },
     postCategories() {
-      axios.post('http://localhost:8080/api/tags', {
+      axios.post('http://localhost:8080/api/categories', {
         name: this.categoryName,
         color: parseInt(this.categoryColor.substr(1), 16),
         scheduleId: this.$route.params.scheduleId,
